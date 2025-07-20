@@ -1,3 +1,9 @@
+> ⚠️ Disclaimer:  
+> The English here might be pretty rough.  
+> This README was created with AI assistance + Google Translate,  
+> so please forgive any awkward phrasing!  
+> Also, if you're a beginner struggling with GitHub/NPM, you're not alone — this stuff can be a real headache. 😅
+
 # ⚠ Expected Lifespan Notice: Potential Future Retirement
 🧭 This package is designed to provide a flexible workaround for memory structure typing (`struct`) in JavaScript, which currently lacks native support for such features.
 
