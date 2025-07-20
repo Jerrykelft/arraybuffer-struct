@@ -210,5 +210,8 @@ worker.js:
 ```javascript
 import { Struct } from 'arraybuffer-struct';
 
-const struct = new Struct({
+const struct = new Struct({}, {});
 ```
+
+
+Not finished yet
