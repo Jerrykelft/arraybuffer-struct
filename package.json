@@ -1,0 +1,14 @@
+{
+  "name": "arraybuffer-struct",
+  "version": "1.0.0",
+  "description": "Map ArrayBuffer to C-like struct with full type support.",
+  "keywords": ["ArrayBuffer", "SharedArrayBuffer", "struct", "binary", "wasm", "data", "umd"],
+  "author": "Jerrykelft",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    "require": "./arraybuffer-struct.cjs",
+    "import": "./arraybuffer-struct.cjs"
+  },
+  "types": "./arraybuffer-struct.d.ts"
+}
