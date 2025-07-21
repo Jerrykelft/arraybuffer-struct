@@ -194,10 +194,10 @@ struct2.data.arr; // Array [1, 2, 3, 4, 5] (all elements are getter/setter)
 ```
 
 ## buffer & byteOffset
-Manually specify an external `ArrayBuffer` as the backing store and set a custom byteOffset.  
+Manually specify an external `ArrayBuffer` as the backing store and set a custom `byteOffset`.  
 Note:
-- An error will be thrown if the remaining space from the given byteOffset is insufficient to fit the entire Struct.
-- If you want to use arrays on byteOffsets that are not multiples of 2, 4, or 8 without possible RangeError, set `{useTypedArray: false}`, which will use js arrays for safe reading and writing
+- An error will be thrown if the remaining space from the given `byteOffset` is insufficient to fit the entire Struct.
+- If you want to use arrays on `byteOffset` that are not multiples of 2, 4, or 8 without possible `RangeError`, set `{useTypedArray: false}`, which will use js arrays for safe reading and writing.
 ```javascript
 const buffer = new ArrayBuffer(1024);
 const struct = new Struct({
