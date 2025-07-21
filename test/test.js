@@ -10,17 +10,33 @@ const {instance: {exports: {get, memory}}} = wasmModule;
 
 var test = async() => {
     console.log('--- 開始測試 ---');
-
-    var e = new Struct({
+    const complexNesting = new Struct({
         a: {
             value: [
                 {value: 1, type: 'i32'},
-                {value: 2, type: 'i8'},
+                {value: 2, type: 'i32'},
+                {
+                    value: {
+                        b: {value: 3, type: 'i32'}
+                    },
+                    type: 'struct'
+                },
             ],
             type: 'struct'
         },
+        c: {value: 4, type: 'i32'},
+        d: {value: {
+            e: {value: 5, type: 'i32'},
+            f: {
+                value: [
+                    {value: 6, type: 'i32'},
+                ],
+                type: 'struct'
+            },
+        }, type: 'struct'}
     });
-    console.log(e.data.a);
+    console.log(complexNesting.data);
+    // console.log(complexNesting.layout);
 
     const struct = new Struct({
         a: {value: null, type: 'i32'},

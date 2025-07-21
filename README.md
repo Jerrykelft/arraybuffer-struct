@@ -24,8 +24,6 @@ A JavaScript library for working with memory buffers as struct types.
 `utf8`: variable-length string  
 `struct`: nested object with its own fields and types  
 
-new Struct
-
 ```javascript
 import { Struct } from 'arraybuffer-struct';
 
@@ -155,6 +153,7 @@ Summary:
 ⚠ Disabling alignment may reduce size but breaks compatibility and causes potential slicing errors  
 ⚠ Enabling `layoutOpt` reorders fields, so offsets may not match original field order — this is not ideal if field layout must match exactly (e.g., in wasm interop)
 
+If you want to use array on non-aligned structures, please set `{useTypedArray: false}`, which will use js array to read and write
 
 ## shared
 ```javascript
@@ -196,7 +195,9 @@ struct2.data.arr; // Array [1, 2, 3, 4, 5] (all elements are getter/setter)
 
 ## buffer & byteOffset
 Manually specify an external `ArrayBuffer` as the backing store and set a custom byteOffset.  
-Note: An error will be thrown if the remaining space from the given byteOffset is insufficient to fit the entire Struct.
+Note:
+- An error will be thrown if the remaining space from the given byteOffset is insufficient to fit the entire Struct.
+- If you want to use arrays on byteOffsets that are not multiples of 2, 4, or 8 without possible RangeError, set `{useTypedArray: false}`, which will use js arrays for safe reading and writing
 ```javascript
 const buffer = new ArrayBuffer(1024);
 const struct = new Struct({

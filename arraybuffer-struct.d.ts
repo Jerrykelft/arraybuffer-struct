@@ -158,7 +158,7 @@ type StructConstructor = {
      * @param obj 結構化的對象，包含型別資訊
      * @param shared (預設為 false ) 是否為共用資源
      */
-    new <T extends StructInputData, U extends StructOptions>(obj: T, options?: U): StructInstance<T, U['useTypedArray']>;
+    new <T extends StructInputData, U extends StructOptions>(obj: T, options?: U): StructInstance<T, U['useTypedArray'] extends false ? false : true>;
 };
 
 interface StructInputData {
@@ -200,6 +200,7 @@ type StructBaseData<B extends boolean = unknown> = {
         type: StructType;
         length: number;
         dims: number[];
+        isArray: boolean;
     }[];
     useTypedArray: B;
     view: DataView;

@@ -135,24 +135,24 @@ var Struct = (function(globalThis) {
                 // 記憶體堆疊偏移量
                 let offset = 0;
 
-                /**@type {({value: any; name: string[];} & ReturnType<typeof parseType>)[]}*/
+                /**@type {({value: any; name: string[]; isArray: boolean;} & ReturnType<typeof parseType>)[]}*/
                 const parseObj = [];
                 // 解析巢狀結構
-                const parseStruct = (o, prefix = []) => Object.entries(o).forEach(([name, value]) =>
+                const parseStruct = (o, prefix = [], isArray = Array.isArray(o)) => Object.entries(o).forEach(([name, value]) =>
                     value.type === 'struct'
-                        ? parseStruct(value.value, [...prefix, name])
-                        : parseObj.push({name: [...prefix, name], value: value.value, ...parseType(value.type)})
+                        ? parseStruct(value.value, [...prefix, name], Array.isArray(value.value))
+                        : parseObj.push({name: [...prefix, name], value: value.value, isArray, ...parseType(value.type)})
                 );
                 parseStruct(obj);
 
                 // 由大到小排序以減少對齊padding
                 if (layoutOpt) parseObj.sort((a, b) => b.totalSize - a.totalSize);
-                for (const {byteSize, totalSize, name, value, type, length, dims} of parseObj) {
+                for (const {byteSize, totalSize, name, value, type, length, dims, isArray} of parseObj) {
                     // 自動對齊: 對齊到該類型的 byteSize
                     if (align) offset = alignOffset(offset, byteSize);
 
-                    this.layout.push({name, offset, type, length, dims});
-                    items.push({name, offset, type, length, dims, value});
+                    this.layout.push({name, offset, type, length, dims, isArray});
+                    items.push({name, offset, type, length, dims, isArray, value});
                     offset += totalSize;
                 }
 
@@ -203,7 +203,7 @@ var Struct = (function(globalThis) {
             }
             /**
              * @param {object} target
-             * @param {{name: string[]; offset: number; type: StructType; length: number; dims: number[];}} info
+             * @param {{name: string[]; offset: number; type: StructType; length: number; dims: number[]; isArray: boolean;}} info
              */
             function defineProperty(target, info) {
                 const {
@@ -211,12 +211,13 @@ var Struct = (function(globalThis) {
                     offset,                // 精確一維位置(bytes偏移量)
                     type,                  // 型別
                     length,                // 一維總長度
-                    dims                   // 維度
+                    dims,                  // 維度
+                    isArray                // 判斷自身是否為某 array struct 的一員
                 } = info;
 
                 if (rest.length > 0) {
-                    target[head] ||= {};
-                    defineProperty(target[head], {name: rest, offset, type, length, dims});
+                    target[head] ||= isArray ? [] : {};
+                    defineProperty(target[head], {name: rest, offset, type, length, dims, isArray});
                 } else {
                     // 這邊檢測value是否為某TypedArray的實例，因為可能輸入長度只有1的陣列
                     if (dims.length > 0) {
