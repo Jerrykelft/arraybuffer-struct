@@ -21,7 +21,7 @@ A JavaScript library for working with memory buffers as struct types.
 `f32`: float32 4 bytes, range: 1.175494351e-38 to 3.402823466e+38  
 `f64`: float64 8 bytes, range: 2.2250738585072014e-308 to 1.7976931348623157e+308  
 `bool`: 1 byte, true or false  
-`utf8`: variable-length string, up to 65535 bytes  
+`utf8`: variable-length string  
 `struct`: nested object with its own fields and types  
 
 new Struct
