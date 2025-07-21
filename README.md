@@ -4,22 +4,27 @@
 > so please forgive any awkward phrasing!  
 > Also, if you're a beginner struggling with GitHub/NPM, you're not alone — this stuff can be a real headache. 😅
 
-# ⚠ Expected Lifespan Notice: Potential Future Retirement
-🧭 This package is designed to provide a flexible workaround for memory structure typing (`struct`) in JavaScript, which currently lacks native support for such features.
-
-However, there is an official proposal underway: https://github.com/tc39/proposal-structs  
-If this proposal is successfully adopted and implemented across environments, native `Struct` support will eventually offer a cleaner, faster, and more integrated solution.
-
-Therefore:  
-📌 This project is **not intended as a long-term stable solution**, but rather as a **transitional utility**.  
-📅 If the proposal is accepted and broadly implemented, this package may be **officially retired** or repurposed as a compatibility layer.
-
-💬 Personally, I'm very excited about this proposal and would love to see it land soon — feel free to visit the repo and give it a star to help bring more attention to it! 😄
 # arraybuffer-struct
-
 A JavaScript library for working with memory buffers as struct types.
 
 # Usage
+
+`i8`: int8 1 byte, range: -128 to 127  
+`u8`: uint8 1 byte, range: 0 to 255  
+`i16`: int16 2 bytes, range: -32768 to 32767  
+`u16`: uint16 2 bytes, range: 0 to 65535  
+`i32`: int32 4 bytes, range: -2147483648 to 2147483647  
+`u32`: uint32 4 bytes, range: 0 to 4294967295  
+`i64`: int64 8 bytes, range: -9223372036854775808 to 9223372036854775807  
+`u64`: uint64 8 bytes, range: 0 to 18446744073709551615  
+`f16`: float16 2 bytes, range: 6.103515625e-05 to 65504  
+`f32`: float32 4 bytes, range: 1.175494351e-38 to 3.402823466e+38  
+`f64`: float64 8 bytes, range: 2.2250738585072014e-308 to 1.7976931348623157e+308  
+`bool`: 1 byte, true or false  
+`utf8`: variable-length string, up to 65535 bytes  
+`struct`: nested object with its own fields and types  
+
+new Struct
 
 ```javascript
 import { Struct } from 'arraybuffer-struct';
@@ -64,9 +69,9 @@ const allTypes = new Struct({
     string: {value: 'abcde', type: 'utf8[100]'}, // string 'abcde'
 
     // Multidimensional Array
-    i32Arr2D_1: {value: [[1, 2], [3, 4]], type: 'i32[2][2]'},
-    i32Arr2D_2: {value: new Int32Array([1, 2, 3, 4]), type: 'i32[2][2]'},
-    i32Arr2D_3: {value: [1, 2, 3, 4], type: 'i32[2][2]'},
+    i32Mat2x2_1: {value: [[1, 2], [3, 4]], type: 'i32[2][2]'},
+    i32Mat2x2_2: {value: new Int32Array([1, 2, 3, 4]), type: 'i32[2][2]'},
+    i32Mat2x2_3: {value: [1, 2, 3, 4], type: 'i32[2][2]'},
 
     i32Mat4x4: {
         value: [
@@ -104,10 +109,12 @@ const allTypes = new Struct({
 });
 ```
 
-f16: Chrome 135+ or Node.js 24+,  
+## 🔧 Type Availability by Platform
+
+`f16`: Chrome 135+ or Node.js 24+,  
 See: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Float16Array#browser_compatibility
 
-i64 & u64: Chrome 67+ or Node.js 10.4+,  
+`i64` & `u64`: Chrome 67+ or Node.js 10.4+,  
 See: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt64Array#browser_compatibility
 
 # options
@@ -124,30 +131,30 @@ const struct2 = new Struct(obj, {align: false, layoutOpt: false});
 struct2.view.buffer.byteLength; // 9
 const struct3 = new Struct(obj, {align: true, layoutOpt: true});
 struct3.view.buffer.byteLength; // 9
-/*
+
+```
 Explanation:
 
 When `align: true` and `layoutOpt: false`, the structure follows C-like natural alignment:
 - `i8` (1 byte) is placed at offset 0
 - `i64` (8 bytes) requires 8-byte alignment, so 7 bytes of padding are inserted
-- Total size becomes: 1 (i8) + 7 (padding) + 8 (i64) = 16 bytes
+- Total size becomes: 1 (`i8`) + 7 (padding) + 8 (`i64`) = 16 bytes
 
 When `align: false`, no padding is applied regardless of type alignment.
-- The structure becomes tightly packed: 1 (i8) + 8 (i64) = 9 bytes
+- The structure becomes tightly packed: 1 (`i8`) + 8 (`i64`) = 9 bytes
 - However, this layout is incompatible with C/wasm and cannot safely use TypedArray slicing for certain fields.
 
 When `layoutOpt: true`, member reordering is enabled (e.g., large fields come first) to minimize padding.
 - With both `align: true` and `layoutOpt: true`, the struct is aligned but members are reordered to reduce size.
 - In this case, `i64` comes first, followed by `i8`, producing a total size of 9 bytes without breaking alignment.
 
-Summary:
+Summary:  
 ✅ `align: true` ensures ABI compatibility with C/C++/WebAssembly memory layout  
 ✅ TypedArray slicing works reliably only when proper alignment is preserved  
-⚠ Disabling alignment may reduce size but breaks compatibility and causes potential slicing errors
-⚠ Enabling `layoutOpt` reorders fields, so offsets may not match original field order — this is not ideal if field layout must match exactly (e.g., in wasm interop)
-*/
 
-```
+⚠ Disabling alignment may reduce size but breaks compatibility and causes potential slicing errors  
+⚠ Enabling `layoutOpt` reorders fields, so offsets may not match original field order — this is not ideal if field layout must match exactly (e.g., in wasm interop)
+
 
 ## shared
 ```javascript
@@ -159,6 +166,7 @@ shared.view.buffer; // SharedArrayBuffer
 ```
 
 ## utf8FixedSize
+only initialize the first element of a `string[]` with a fixed size.
 ```javascript
 const obj = {
     strArr: {value: ['abc', 'def'], type: 'utf8[2][100]'}
@@ -173,6 +181,9 @@ struct2.data.strArr; // ["abcdef", ""]
 ```
 
 ## useTypedArray
+Enable or disable returning native TypedArray views for fixed-size array fields.  
+When useTypedArray is `true`, array fields will be represented as real TypedArray instances, allowing fast bulk operations and compatibility with APIs that expect typed arrays.  
+When `false`, the array is returned as a normal JavaScript array with each element implemented via getter/setter for fine-grained control.
 ```javascript
 const obj = {
     arr: {value: [1, 2, 3, 4, 5], type: 'i32[5]'}
@@ -184,6 +195,8 @@ struct2.data.arr; // Array [1, 2, 3, 4, 5] (all elements are getter/setter)
 ```
 
 ## buffer & byteOffset
+Manually specify an external `ArrayBuffer` as the backing store and set a custom byteOffset.  
+Note: An error will be thrown if the remaining space from the given byteOffset is insufficient to fit the entire Struct.
 ```javascript
 const buffer = new ArrayBuffer(1024);
 const struct = new Struct({
@@ -197,27 +210,141 @@ struct.view.buffer === buffer; // true
 struct.view.byteOffset; // 128
 ```
 
-# SharedArrayBuffer & Worker
+# Serializable by structuredClone / postMessage
+`Struct` instances are designed to be safely serialized using `structuredClone` or transferred via `postMessage` (e.g. to a Web Worker or Node.js worker thread).
 
-Please make sure you have enabled COOP/COEP, otherwise SharedArrayBuffer will not be available.
+When a `Struct` object is cloned or transferred:
+
+Its internal layout metadata (field types, offsets, etc.) is preserved.
+
+The underlying buffer (`ArrayBuffer` or `SharedArrayBuffer`) is retained and re-linked.
+
+You can reconstruct a working `Struct` instance simply by passing the cloned object into new `Struct(...)`.
+
+```javascript
+// In main thread:
+const struct = new Struct({...}, {shared: true});
+worker.postMessage(struct); // structuredClone happens automatically
+
+// In worker thread:
+parentPort.on("message", data => {
+    const clone = new Struct(data); // Rebuilds the same structure
+    clone.data.someField = 42; // Modifies the same SharedArrayBuffer
+});
+```
+If a `SharedArrayBuffer` is used, both the original and cloned `Struct` instances will operate on the same shared memory, enabling real-time synchronization between threads. This makes inter-thread communication and memory-mapped data models extremely simple and efficient.
+
+
+# SharedArrayBuffer & Worker
+Please make sure you have enabled `COOP/COEP`, otherwise `SharedArrayBuffer` will not be available.
 
 main.js:
 ```javascript
 import Struct from "arraybuffer-struct";
 import { Worker } from "worker_threads";
 const shared = new Struct({
-    counter: {value: 0, type: 'i32'}
+    counter: {value: [0], type: 'i32[1]'}
 }, {
     shared: true
+});
+const worker = new Worker("./worker.js");
+worker.postMessage({shared: shared});
+
+worker.on("message", () => {
+    console.log(shared.data.counter[0]);
 });
 ```
 
 worker.js:
 ```javascript
-import { Struct } from 'arraybuffer-struct';
+import Struct from "arraybuffer-struct";
+import { parentPort } from "worker_threads";
 
-const struct = new Struct({}, {});
+parentPort.on("message", ({shared}) => {
+    const shared = new Struct(shared);
+    for (let i = 0; i < 1000000; i++) {
+        Atomics.add(shared.data.counter, 0, 1);
+    }
+    parentPort.postMessage("done");
+});
 ```
 
 
-Not finished yet awa
+# WebAssembly Struct ⇄ JavaScript Struct Object
+This library bridges the gap between low-level memory structures in WebAssembly (C/C++) and high-level structured objects in `JavaScript`. It allows developers to define struct layouts in `JavaScript` that exactly match native memory layouts, enabling direct memory mapping via `ArrayBuffer` or `SharedArrayBuffer`.  
+
+Key use cases include:  
+
+- Interfacing with WebAssembly modules that return raw pointers to structs.  
+- Interpreting memory buffers from native code (e.g., WASM, C/C++) as structured JS objects.  
+- Creating compact, binary-efficient data representations for workers or network transfers.  
+- Supporting precise control over memory alignment and layout optimization.  
+
+By syncing memory layout between JS and WASM, this tool enables efficient and predictable memory access — especially useful when working with shared memory, TypedArray slicing, or low-level binary protocols.
+
+struct.c:
+```c
+#include <stdint.h>
+
+typedef struct {
+    int a;
+    float b;
+    char c[10];
+    long long d;
+    unsigned char e;
+} Data;
+
+Data data = {1, 2.3f, "hello", 5ll, 255U};
+
+uintptr_t get() {
+    return (uintptr_t)&data;
+}
+// emcc -o struct.wasm struct.c --no-entry -s STANDALONE_WASM=1 -s EXPORTED_FUNCTIONS="['_get']"
+```
+
+main.js:
+```javascript
+import { Struct } from "arraybuffer-struct";
+import * as fs from "fs";
+
+const wasmBuffer = fs.readFileSync("./test.wasm");
+
+const wasmModule = await WebAssembly.instantiate(wasmBuffer);
+
+const {instance: {exports: {get, memory}}} = wasmModule;
+
+const struct = new Struct({
+    // Not initialized values
+    a: {value: null, type: 'i32'},
+    b: {value: null, type: 'f32'},
+    c: {value: null, type: 'utf8[10]'},
+    d: {value: null, type: 'i64'},
+    e: {value: null, type: 'u8'}
+}, {
+    align: true,
+    layoutOpt: false,
+    buffer: memory.buffer,
+    byteOffset: get()
+});
+const {data} = struct;
+console.log([data.a, data.b, data.c, data.d, data.e]); // [1, 2.299999952316284, "hello", 5n, 255]
+```
+
+# ✅ Module Format Support
+This library supports multiple module systems for maximum compatibility:
+
+UMD (for direct use in browsers via `<script>` tag or CDN)  
+CommonJS (for Node.js require)  
+ESM (for modern import in both Node.js and browser environments)
+
+# ⚠ Expected Lifespan Notice: Potential Future Retirement
+🧭 This package is designed to provide a flexible workaround for memory structure typing (`struct`) in JavaScript, which currently lacks native support for such features.
+
+However, there is an official proposal underway: https://github.com/tc39/proposal-structs  
+If this proposal is successfully adopted and implemented across environments, native `Struct` support will eventually offer a cleaner, faster, and more integrated solution.
+
+Therefore:  
+📌 This project is **not intended as a long-term stable solution**, but rather as a **transitional utility**.  
+📅 If the proposal is accepted and broadly implemented, this package may be **officially retired** or repurposed as a compatibility layer.
+
+💬 Personally, I'm very excited about this proposal and would love to see it land soon — feel free to visit the repo and give it a star to help bring more attention to it! 😄

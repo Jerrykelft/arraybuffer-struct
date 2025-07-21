@@ -2,7 +2,7 @@ import * as fs from "fs";
 import Struct from "arraybuffer-struct";
 import {Worker} from "worker_threads";
 
-const wasmBuffer = fs.readFileSync("./test.wasm");
+const wasmBuffer = fs.readFileSync("./test/test.wasm");
 
 const wasmModule = await WebAssembly.instantiate(wasmBuffer);
 
@@ -82,7 +82,7 @@ utf8FixedSize: true => utf8: [0]: ${o5.data.a[0]}, [1]: ${o5.data.a[1]}
     const NUM_WORKERS = 8;
     const INCREMENTS_PER_WORKER = 10000;
 
-    const workers = Array.from({length: NUM_WORKERS}, () => new Worker('./test-worker.js'));
+    const workers = Array.from({length: NUM_WORKERS}, () => new Worker('./test/test-worker.js'));
 
     await Promise.all(
         workers.map(worker => {
