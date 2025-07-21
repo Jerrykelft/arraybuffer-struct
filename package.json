@@ -7,8 +7,8 @@
   "license": "MIT",
   "type": "module",
   "exports": {
-    "require": "./arraybuffer-struct.cjs",
-    "import": "./arraybuffer-struct.cjs"
+    "require": "./arraybuffer-struct.umd.cjs",
+    "import": "./arraybuffer-struct.umd.cjs"
   },
   "types": "./arraybuffer-struct.d.ts",
   "repository": {
