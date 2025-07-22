@@ -29,7 +29,7 @@
                 get: DataView.prototype.getInt8,
                 set: DataView.prototype.setInt8,
                 array: Int8Array,
-                arrayLogic(view, offset, length) {return {value: new this.array(buffer, view.byteOffset + offset, length), writable: true};}
+                arrayLogic(view, offset, length) {return {value: new this.array(view.buffer, view.byteOffset + offset, length), writable: true};}
             },
             u8: {
                 get: DataView.prototype.getUint8,
