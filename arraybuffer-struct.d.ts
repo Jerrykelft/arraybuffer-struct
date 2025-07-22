@@ -158,7 +158,7 @@ type StructConstructor = {
      * @param obj 結構化的對象，包含型別資訊
      * @param shared (預設為 false ) 是否為共用資源
      */
-    new <T extends StructInputData, U extends StructOptions>(obj: T, options?: U): StructInstance<T, U['useTypedArray'] extends false ? false : true>;
+    new <T extends StructInputData, U extends StructOptions>(obj: T, options?: U & StructOptions): StructInstance<T, U['useTypedArray'] extends false ? false : true>;
 };
 
 interface StructInputData {
@@ -275,5 +275,8 @@ type StructInstance<
 > = {data: StructData<T, B>;} & StructBaseData<B>;
 
 declare var Struct: StructConstructor;
-export = Struct;
-export type {StructType, StructOptions, StructInputData, StructBaseData, StructData, StructInstance};
+
+declare module 'arraybuffer-struct' {
+    export = Struct;
+    export type {StructType, StructOptions, StructInputData, StructBaseData, StructData, StructInstance};
+}

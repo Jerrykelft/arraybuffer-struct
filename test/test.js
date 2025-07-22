@@ -6,6 +6,7 @@ const wasmBuffer = fs.readFileSync("./test/test.wasm");
 
 const wasmModule = await WebAssembly.instantiate(wasmBuffer);
 
+/**@type {{instance: {exports: {get: () => number; memory: WebAssembly.Memory;}}}}*/
 const {instance: {exports: {get, memory}}} = wasmModule;
 
 var test = async() => {
