@@ -13,6 +13,6 @@
   "types": "./arraybuffer-struct.d.ts",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Jerrykelft/arraybuffer-struct"
+    "url": "https://github.com/Jerrykelft/arraybuffer-struct"
   }
 }
