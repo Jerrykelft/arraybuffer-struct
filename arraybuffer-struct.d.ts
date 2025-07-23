@@ -23,17 +23,17 @@ type ArrayFromPath<S extends string, RefType = unknown> =
     RefType extends AnyTypedArray
         ? ToArrayOf<RefType, Tail<CountDims<S>>> & {
             /**
-             * 注意: 只有多維陣列才會生成flatView屬性，單維陣列則沒有此屬性。
+             * ⚠️注意: 只有多維陣列才會生成flatView屬性，單維陣列則沒有此屬性。
              * 
-             * Note: Only multi-dimensional arrays will generate the flatView property, single-dimensional arrays do not have this property.
+             * ⚠️Note: Only multi-dimensional arrays will generate the flatView property, single-dimensional arrays do not have this property.
              */
             flatView: RefType;
         } // 若是 TypedArray，少一層
         : ToArrayOf<RefType, CountDims<S>> & {
             /**
-             * 注意: 只有多維陣列才會生成flatView屬性，單維陣列則沒有此屬性。
+             * ⚠️注意: 只有多維陣列才會生成flatView屬性，單維陣列則沒有此屬性。
              * 
-             * Note: Only multi-dimensional arrays will generate the flatView property, single-dimensional arrays do not have this property.
+             * ⚠️Note: Only multi-dimensional arrays will generate the flatView property, single-dimensional arrays do not have this property.
              */
             flatView: RefType[];
         }; // 否則全數展開為 number[]...
@@ -85,7 +85,7 @@ interface StructOptions {
      * 設為 `true` 時，將依據型別對齊規則重新排列結構成員順序，
      * 以減少 padding 並優化記憶體使用。
      *
-     * ⚠ 注意: 若結構成員順序具有語意(如二進位序列化或 ABI 相容需求)，
+     * ⚠️ 注意: 若結構成員順序具有語意(如二進位序列化或 ABI 相容需求)，
      * 請勿啟用此選項。
      * 
      * Whether to enable memory layout optimization.
@@ -93,7 +93,7 @@ interface StructOptions {
      * When set to `true`, the order of structure members will be rearranged according to type alignment rules,
      * to reduce padding and optimize memory usage.
      *
-     * ⚠ Note: Do not enable this option if the order of structure members has semantics (such as binary serialization or ABI compatibility requirements).
+     * ⚠️ Note: Do not enable this option if the order of structure members has semantics (such as binary serialization or ABI compatibility requirements).
      * 
      * @default false
      */
@@ -196,11 +196,11 @@ interface StructInputData {
 type StructBaseData<B extends boolean = unknown> = {
     layout: {
         name: string[];
+        isArray: boolean[];
         offset: number;
         type: StructType;
         length: number;
         dims: number[];
-        isArray: boolean;
     }[];
     useTypedArray: B;
     view: DataView;

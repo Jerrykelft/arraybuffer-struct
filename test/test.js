@@ -1,8 +1,8 @@
-import * as fs from "fs";
-import Struct from "arraybuffer-struct";
-import {Worker} from "worker_threads";
+import * as fs from 'fs';
+import Struct from 'arraybuffer-struct';
+import {Worker} from 'worker_threads';
 
-const wasmBuffer = fs.readFileSync("./test/test.wasm");
+const wasmBuffer = fs.readFileSync('./test/test.wasm');
 
 const wasmModule = await WebAssembly.instantiate(wasmBuffer);
 
@@ -34,10 +34,18 @@ var test = async() => {
                 ],
                 type: 'struct'
             },
-        }, type: 'struct'}
-    });
+        }, type: 'struct'},
+        g: {
+            value: Array.from({length: 3}, () => (
+                {value: {x: {value: 1, type: 'i32'}, y: {value: 2, type: 'i32'}, other: {value: {val: {value: 3, type: 'i32'}}, type: 'struct'}}, type: 'struct'}
+            )),
+            type: 'struct'
+        }
+    }, {});
+    console.log('data:');
     console.log(complexNesting.data);
-    // console.log(complexNesting.layout);
+    console.log('layout:');
+    console.log(complexNesting.layout);
 
     const struct = new Struct({
         a: {value: null, type: 'i32'},
@@ -93,8 +101,7 @@ utf8FixedSize: true => utf8: [0]: ${o5.data.a[0]}, [1]: ${o5.data.a[1]}
     console.log(`結果: ${o8.data.a.b.c}, 預期: 1`);
 
     const shared = new Struct({
-        counter: {value: new Int32Array(1), type: 'i32[1]'},
-        lock: {value: new Int32Array(1), type: 'i32[1]'}
+        counter: {value: new Int32Array(1), type: 'i32[1]'}
     }, {shared: true});
     const NUM_WORKERS = 8;
     const INCREMENTS_PER_WORKER = 10000;
@@ -118,3 +125,42 @@ utf8FixedSize: true => utf8: [0]: ${o5.data.a[0]}, [1]: ${o5.data.a[1]}
     console.log('--- 測試結束 ---');
 };
 await test();
+
+const typeHintTest = (() => {
+    // WHAT THE FUCK IS THIS, TYPESCRIPT ???
+
+    const a = new Struct({
+        a: {
+            value: Array.from({length: 10}, () => (
+                {value: {x: {value: 1, type: 'i32'}, y: {value: 2, type: 'i32'}}, type: 'struct'}
+            )),
+            type: 'struct'
+        }
+    });
+    a.data.a; // type hint: any[]
+
+    const b = new Struct({
+        a: {
+            value: Array.from({length: 10}, () => (
+                {value: {x: {value: 1, type: 'i32'}, y: {value: 2, type: 'i32'}}, type: 'struct'}
+            )),
+            type: 'struct'
+        }
+    }, {});
+    b.data.a; // type hint: {x: number; y: number;}[]
+
+    /**
+     * @typedef {import('arraybuffer-struct').StructInputData} StructInputData
+     */
+    /**@satisfies {StructInputData}*/
+    const obj = {
+        a: {
+            value: Array.from({length: 10}, () => (
+                {value: {x: {value: 1, type: 'i32'}, y: {value: 2, type: 'i32'}}, type: 'struct'}
+            )),
+            type: 'struct'
+        }
+    };
+    const c = new Struct(obj, {});
+    c.data.a; // type hint: {x: number; y: number;}[]
+});

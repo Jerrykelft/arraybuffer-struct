@@ -149,13 +149,13 @@
                     // 記憶體堆疊偏移量
                     let offset = 0;
 
-                    /**@type {({value: any; name: string[]; isArray: boolean;} & ReturnType<typeof parseType>)[]}*/
+                    /**@type {({value: any; name: string[]; isArray: boolean[];} & ReturnType<typeof parseType>)[]}*/
                     const parseObj = [];
                     // 解析巢狀結構
-                    const parseStruct = (o, prefix = [], isArray = Array.isArray(o)) => Object.entries(o).forEach(([name, value]) =>
+                    const parseStruct = (o, prefix = [], isArray = []) => Object.entries(o).forEach(([name, value]) =>
                         value.type === 'struct'
-                            ? parseStruct(value.value, [...prefix, name], Array.isArray(value.value))
-                            : parseObj.push({name: [...prefix, name], value: value.value, isArray, ...parseType(value.type)})
+                            ? parseStruct(value.value, [...prefix, name], [...isArray, Array.isArray(value.value)])
+                            : parseObj.push({name: [...prefix, name], value: value.value, isArray: [...isArray, Array.isArray(value.value)], ...parseType(value.type)})
                     );
                     parseStruct(obj);
 
@@ -217,21 +217,21 @@
                 }
                 /**
                  * @param {object} target
-                 * @param {{name: string[]; offset: number; type: StructType; length: number; dims: number[]; isArray: boolean;}} info
+                 * @param {{name: string[]; isArray: boolean[]; offset: number; type: StructType; length: number; dims: number[];}} info
                  */
                 function defineProperty(target, info) {
                     const {
                         name: [head, ...rest], // namespace嵌套
-                        offset,                // 精確一維位置(bytes偏移量)
-                        type,                  // 型別
-                        length,                // 一維總長度
-                        dims,                  // 維度
-                        isArray                // 判斷自身是否為某 array struct 的一員
+                        isArray: [isHeadArray, ...restIsArray], // 當前namespace欄位是否是陣列
+                        offset, // 精確一維位置(bytes偏移量)
+                        type, // 型別
+                        length, // 一維總長度
+                        dims // 維度
                     } = info;
 
                     if (rest.length > 0) {
-                        target[head] ||= isArray ? [] : {};
-                        defineProperty(target[head], {name: rest, offset, type, length, dims, isArray});
+                        target[head] ||= isHeadArray ? [] : {};
+                        defineProperty(target[head], {name: rest, offset, type, length, dims, isArray: restIsArray});
                     } else {
                         // 這邊檢測value是否為某TypedArray的實例，因為可能輸入長度只有1的陣列
                         if (dims.length > 0) {

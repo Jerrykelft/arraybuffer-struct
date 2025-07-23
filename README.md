@@ -338,6 +338,61 @@ UMD (for direct use in browsers via `<script>` tag or CDN)
 CommonJS (for Node.js require)  
 ESM (for modern import in both Node.js and browser environments)
 
+# ⚠️ TypeScript Type Inference Quirk
+Due to limitations in TypeScript's inference system — particularly around deeply nested generic arguments — the compiler might fail to infer the correct types if optional parameters are omitted. This can result in unexpected fallback to any.
+
+Consider the following example:
+```javascript
+const a = new Struct({
+  a: {
+    value: Array.from({ length: 10 }, () => ({
+      value: { x: { value: 1, type: 'i32' }, y: { value: 2, type: 'i32' } },
+      type: 'struct'
+    })),
+    type: 'struct'
+  }
+});
+a.data.a; // ❌ TypeScript infers: any[]
+```
+
+Despite being well-structured, a.data.a becomes any[]. However, simply supplying the optional options parameter — even an empty object — resolves the issue:
+
+✅ Solution 1: Pass {} as the options parameter
+```javascript
+const b = new Struct({
+    a: {
+        value: Array.from({ length: 10 }, () => ({
+            value: { x: { value: 1, type: 'i32' }, y: { value: 2, type: 'i32' } },
+            type: 'struct'
+        })),
+        type: 'struct'
+    }
+}, {});
+b.data.a; // ✅ TypeScript infers: { x: number; y: number }[]
+```
+
+✅ Solution 2: Use @satisfies with type annotation
+```javascript
+/**
+ * @typedef {import('arraybuffer-struct').StructInputData} StructInputData
+ */
+/** @satisfies {StructInputData} */
+const obj = {
+  a: {
+    value: Array.from({ length: 10 }, () => ({
+      value: { x: { value: 1, type: 'i32' }, y: { value: 2, type: 'i32' } },
+      type: 'struct'
+    })),
+    type: 'struct'
+  }
+};
+const c = new Struct(obj, {});
+c.data.a; // ✅ TypeScript infers: { x: number; y: number }[]
+```
+
+🧠 Explanation
+The reason behind this behavior is that TypeScript prioritizes inference from the second generic parameter when both are involved. When the second argument (options) is omitted, it can cause the first argument (T) to lose inference context, defaulting to any. This is a known edge case in TypeScript's inference mechanics.
+
 # ⚠ Expected Lifespan Notice: Potential Future Retirement
 🧭 This package is designed to provide a flexible workaround for memory structure typing (`struct`) in JavaScript, which currently lacks native support for such features.
 

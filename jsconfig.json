@@ -2,6 +2,5 @@
     "compilerOptions": {
         "target": "esnext",
         "lib": ["ESNext", "DOM", "WebWorker"]
-    },
-    "exclude": ["umd"]
+    }
 }
