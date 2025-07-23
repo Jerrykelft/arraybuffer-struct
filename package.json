@@ -1,6 +1,6 @@
 {
   "name": "arraybuffer-struct",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Map ArrayBuffer to C-like struct with full type support.",
   "keywords": ["ArrayBuffer", "SharedArrayBuffer", "struct", "binary", "wasm", "data", "UMD", "CommonJS", "ESM"],
   "author": "Jerrykelft",
@@ -13,6 +13,6 @@
   "types": "./arraybuffer-struct.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Jerrykelft/arraybuffer-struct"
+    "url": "git+https://github.com/Jerrykelft/arraybuffer-struct"
   }
 }

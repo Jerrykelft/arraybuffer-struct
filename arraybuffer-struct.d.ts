@@ -20,7 +20,8 @@ type Tail<T extends unknown[]> = T extends [unknown, ...infer R] ? R : [];
 
 // 根據 Path 和 RefType 產生對應型別
 type ArrayFromPath<S extends string, RefType = unknown> =
-    RefType extends AnyTypedArray
+    RefType extends AnyTypedArray | string
+        // 若是 TypedArray 或 string，少一層
         ? ToArrayOf<RefType, Tail<CountDims<S>>> & {
             /**
              * ⚠️注意: 只有多維陣列才會生成flatView屬性，單維陣列則沒有此屬性。
@@ -28,7 +29,8 @@ type ArrayFromPath<S extends string, RefType = unknown> =
              * ⚠️Note: Only multi-dimensional arrays will generate the flatView property, single-dimensional arrays do not have this property.
              */
             flatView: RefType;
-        } // 若是 TypedArray，少一層
+        }
+        // 否則全數展開為 number[]...
         : ToArrayOf<RefType, CountDims<S>> & {
             /**
              * ⚠️注意: 只有多維陣列才會生成flatView屬性，單維陣列則沒有此屬性。
@@ -36,7 +38,7 @@ type ArrayFromPath<S extends string, RefType = unknown> =
              * ⚠️Note: Only multi-dimensional arrays will generate the flatView property, single-dimensional arrays do not have this property.
              */
             flatView: RefType[];
-        }; // 否則全數展開為 number[]...
+        };
 
 type DimTail = '' | `[${number}]` | `[${number}]${DimTail}`;
 
