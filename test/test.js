@@ -18,7 +18,7 @@ var test = async() => {
                 {value: 2, type: 'i32'},
                 {
                     value: {
-                        b: {value: 3, type: 'i32'}
+                        b: {value: 3, type: 'i8'}
                     },
                     type: 'struct'
                 },
@@ -27,7 +27,7 @@ var test = async() => {
         },
         c: {value: 4, type: 'i32'},
         d: {value: {
-            e: {value: 5, type: 'i32'},
+            e: {value: 5, type: 'i16'},
             f: {
                 value: [
                     {value: 6, type: 'i32'},

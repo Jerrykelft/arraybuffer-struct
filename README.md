@@ -11,6 +11,7 @@ A JavaScript library for working with memory buffers as struct types.
 
 `i8`: int8 1 byte, range: -128 to 127  
 `u8`: uint8 1 byte, range: 0 to 255  
+`u8c`: uint8 clamped 1 byte, range: 0 to 255, clamps values outside the range to 0 or 255  
 `i16`: int16 2 bytes, range: -32768 to 32767  
 `u16`: uint16 2 bytes, range: 0 to 65535  
 `i32`: int32 4 bytes, range: -2147483648 to 2147483647  
@@ -23,6 +24,8 @@ A JavaScript library for working with memory buffers as struct types.
 `bool`: 1 byte, true or false  
 `utf8`: variable-length string  
 `struct`: nested object with its own fields and types  
+
+**Always use little endian reading and writing.**
 
 ```javascript
 import { Struct } from 'arraybuffer-struct';
@@ -150,8 +153,8 @@ Summary:
 ✅ `align: true` ensures ABI compatibility with C/C++/WebAssembly memory layout  
 ✅ TypedArray slicing works reliably only when proper alignment is preserved  
 
-⚠ Disabling alignment may reduce size but breaks compatibility and causes potential slicing errors  
-⚠ Enabling `layoutOpt` reorders fields, so offsets may not match original field order — this is not ideal if field layout must match exactly (e.g., in wasm interop)
+⚠️ Disabling alignment may reduce size but breaks compatibility and causes potential slicing errors  
+⚠️ Enabling `layoutOpt` reorders fields, so offsets may not match original field order — this is not ideal if field layout must match exactly (e.g., in wasm interop)
 
 If you want to use array on non-aligned structures, please set `{useTypedArray: false}`, which will use js array to read and write
 
@@ -237,7 +240,7 @@ If a `SharedArrayBuffer` is used, both the original and cloned `Struct` instance
 
 
 # SharedArrayBuffer & Worker
-Please make sure you have enabled `COOP/COEP`, otherwise `SharedArrayBuffer` will not be available.
+Please make sure you have enabled `COOP`/`COEP`, otherwise `SharedArrayBuffer` will not be available.
 
 main.js:
 ```javascript
@@ -272,16 +275,16 @@ parentPort.on("message", ({shared}) => {
 
 
 # WebAssembly Struct ⇄ JavaScript Struct Object
-This library bridges the gap between low-level memory structures in WebAssembly (C/C++) and high-level structured objects in `JavaScript`. It allows developers to define struct layouts in `JavaScript` that exactly match native memory layouts, enabling direct memory mapping via `ArrayBuffer` or `SharedArrayBuffer`.  
+This library bridges the gap between low-level memory structures in `WebAssembly` (C/C++) and high-level structured objects in `JavaScript`. It allows developers to define struct layouts in `JavaScript` that exactly match native memory layouts, enabling direct memory mapping via `ArrayBuffer` or `SharedArrayBuffer`.  
 
 Key use cases include:  
 
-- Interfacing with WebAssembly modules that return raw pointers to structs.  
+- Interfacing with `WebAssembly` modules that return raw pointers to structs.  
 - Interpreting memory buffers from native code (e.g., WASM, C/C++) as structured JS objects.  
 - Creating compact, binary-efficient data representations for workers or network transfers.  
 - Supporting precise control over memory alignment and layout optimization.  
 
-By syncing memory layout between JS and WASM, this tool enables efficient and predictable memory access — especially useful when working with shared memory, TypedArray slicing, or low-level binary protocols.
+By syncing memory layout between JS and WASM, this tool enables efficient and predictable memory access — especially useful when working with shared memory, `TypedArray` slicing, or low-level binary protocols.
 
 struct.c:
 ```c

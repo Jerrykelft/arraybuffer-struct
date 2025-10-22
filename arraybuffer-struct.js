@@ -29,67 +29,73 @@
                 get: DataView.prototype.getInt8,
                 set: DataView.prototype.setInt8,
                 array: Int8Array,
-                arrayLogic(view, offset, length) {return {value: new this.array(view.buffer, view.byteOffset + offset, length), writable: true};}
+                arrayLogic(view, offset, length) {return {value: new this.array(view.buffer, offset, length), writable: true};}
             },
             u8: {
                 get: DataView.prototype.getUint8,
                 set: DataView.prototype.setUint8,
                 array: Uint8Array,
-                arrayLogic(view, offset, length) {return {value: new this.array(view.buffer, view.byteOffset + offset, length), writable: true};}
+                arrayLogic(view, offset, length) {return {value: new this.array(view.buffer, offset, length), writable: true};}
+            },
+            u8c: {
+                get: DataView.prototype.getUint8,
+                set: DataView.prototype.setUint8,
+                array: Uint8ClampedArray,
+                arrayLogic(view, offset, length) {return {value: new this.array(view.buffer, offset, length), writable: true};}
             },
             i16: {
                 get: DataView.prototype.getInt16,
                 set: DataView.prototype.setInt16,
                 array: Int16Array,
-                arrayLogic(view, offset, length) {return {value: new this.array(view.buffer, view.byteOffset + offset, length), writable: true};}
+                arrayLogic(view, offset, length) {return {value: new this.array(view.buffer, offset, length), writable: true};}
             },
             u16: {
                 get: DataView.prototype.getUint16,
                 set: DataView.prototype.setUint16,
                 array: Uint16Array,
-                arrayLogic(view, offset, length) {return {value: new this.array(view.buffer, view.byteOffset + offset, length), writable: true};}
+                arrayLogic(view, offset, length) {return {value: new this.array(view.buffer, offset, length), writable: true};}
             },
             i32: {
                 get: DataView.prototype.getInt32,
                 set: DataView.prototype.setInt32,
                 array: Int32Array,
-                arrayLogic(view, offset, length) {return {value: new this.array(view.buffer, view.byteOffset + offset, length), writable: true};}
+                arrayLogic(view, offset, length) {return {value: new this.array(view.buffer, offset, length), writable: true};}
             },
             u32: {
                 get: DataView.prototype.getUint32,
                 set: DataView.prototype.setUint32,
                 array: Uint32Array,
-                arrayLogic(view, offset, length) {return {value: new this.array(view.buffer, view.byteOffset + offset, length), writable: true};}
+                arrayLogic(view, offset, length) {return {value: new this.array(view.buffer, offset, length), writable: true};}
             },
             i64: {
                 get: DataView.prototype.getBigInt64,
                 set: DataView.prototype.setBigInt64,
                 array: BigInt64Array,
-                arrayLogic(view, offset, length) {return {value: new this.array(view.buffer, view.byteOffset + offset, length), writable: true};}
+                arrayLogic(view, offset, length) {return {value: new this.array(view.buffer, offset, length), writable: true};}
             },
             u64: {
                 get: DataView.prototype.getBigUint64,
                 set: DataView.prototype.setBigUint64,
                 array: BigUint64Array,
-                arrayLogic(view, offset, length) {return {value: new this.array(view.buffer, view.byteOffset + offset, length), writable: true};}
+                arrayLogic(view, offset, length) {return {value: new this.array(view.buffer, offset, length), writable: true};}
             },
             f16: {
                 get: DataView.prototype.getFloat16,
                 set: DataView.prototype.setFloat16,
                 array: Float16Array,
-                arrayLogic(view, offset, length) {return {value: new this.array(view.buffer, view.byteOffset + offset, length), writable: true};}
+                arrayLogic(view, offset, length) {return {value: new this.array(view.buffer, offset, length), writable: true};}
             },
             f32: {
                 get: DataView.prototype.getFloat32,
                 set: DataView.prototype.setFloat32,
                 array: Float32Array,
-                arrayLogic(view, offset, length) {return {value: new this.array(view.buffer, view.byteOffset + offset, length), writable: true};}
+                arrayLogic(view, offset, length) {return {value: new this.array(view.buffer, offset, length), writable: true};}
             },
             f64: {
                 get: DataView.prototype.getFloat64,
                 set: DataView.prototype.setFloat64,
                 array: Float64Array,
-                arrayLogic(view, offset, length) {return {value: new this.array(view.buffer, view.byteOffset + offset, length), writable: true};}
+                arrayLogic(view, offset, length) {return {value: new this.array(view.buffer, offset, length), writable: true};}
             },
             bool: {
                 /**@this {DataView}*/
@@ -106,18 +112,18 @@
                 set: function(byteOffset, value) {DataView.prototype.setUint8.call(this, byteOffset, encoder.encode(value)[0]);},
                 array: Uint8Array,
                 arrayLogic(view, offset, length) {
-                    const typedArray = new this.array(view.buffer, view.byteOffset + offset, length);
+                    const typedArray = new this.array(view.buffer, offset, length);
                     return {
                         get: () => cString(decoder.decode(this.array.from(typedArray))),
                         set: value => typedArray.set(encoder.encode(value + '\0'))
                     };
                 },
-                arrayLogicUint8(view, offset, length) {return {value: new this.array(view.buffer, view.byteOffset + offset, length), writable: true};}
-                // getUint8Array(buffer, offset, length) {return new this.array(buffer, offset, length);},
-                // setUint8Array(buffer, offset, length, value) {new this.array(buffer, offset, length).set(value);}
-            }
+                arrayLogicUint8(view, offset, length) {return {value: new this.array(view.buffer, offset, length), writable: true};}
+            },
+            utf16: {},
+            utf32: {}
         };
-        return class $Cls {
+        return class Struct {
             static noWarn = false;
             /**@type {StructInstance['layout']}*/
             layout = []; // 記憶體結構布局紀錄
@@ -140,7 +146,7 @@
                         defineProperty(this.data, info);
                     }
                 } else {
-                    if (!$Cls.noWarn && useTypedArray) {
+                    if (!Struct.noWarn && useTypedArray) {
                         if (!align) console.warn('Warning: useTypedArray is enabled but align is off. TypedArray view may throw due to misalignment. If you don\'t want to see this warning, set Struct.noWarn = true;');
                         if (buffer && byteOffset % 8 !== 0) console.warn('Warning: byteOffset is not aligned to 8 bytes but useTypedArray is enabled. TypedArray view may throw due to misalignment. If you don\'t want to see this warning, set Struct.noWarn = true;');
                     }
@@ -280,7 +286,7 @@
                     const {target, name, offset, type, length, enumerable = true, configurable = true} = info;
                     const typeInfo = typeMap[type];
                     if ((thisCls.useTypedArray && typeInfo.arrayLogic) || type === 'utf8') {
-                        const arrayLogic = typeInfo.arrayLogic(thisCls.view, offset, length);
+                        const arrayLogic = typeInfo.arrayLogic(thisCls.view, thisCls.view.byteOffset + offset, length);
                         Object.defineProperty(target, name, {...arrayLogic, enumerable, configurable});
                     } else {
                         // fallback: 不對齊模式

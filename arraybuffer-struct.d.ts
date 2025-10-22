@@ -3,7 +3,7 @@
  * Copyright (c) 2025 Jerrykelft
  */
 
-type StructType = 'i8' | 'u8' | 'i16' | 'u16' | 'i32' | 'u32' | 'i64' | 'u64' | 'f16' | 'f32' | 'f64' | 'bool' | 'utf8';
+type StructType = 'i8' | 'u8' | 'u8c' | 'i16' | 'u16' | 'i32' | 'u32' | 'i64' | 'u64' | 'f16' | 'f32' | 'f64' | 'bool' | 'utf8';
 
 type AnyTypedArray = Uint8Array | Uint16Array | Uint32Array | BigUint64Array | Int8Array | Int16Array | Int32Array | BigInt64Array | Float16Array | Float32Array | Float64Array;
 
@@ -158,7 +158,7 @@ type StructConstructor = {
     new <T extends StructBaseData>(rebuildData: T): StructInstance<{[key: string]: {value: any; type: string;};}, T['useTypedArray']>;
     /**
      * @param obj 結構化的對象，包含型別資訊
-     * @param shared (預設為 false ) 是否為共用資源
+     * @param options 建構設置
      */
     new <T extends StructInputData, U extends StructOptions>(obj: T, options?: U & StructOptions): StructInstance<T, U['useTypedArray'] extends false ? false : true>;
 };
@@ -166,33 +166,22 @@ type StructConstructor = {
 interface StructInputData {
     [key: string]:
         {value: StructInputData; type: 'struct';} |
-        {value: unknown; type: 'i8';} |
-        {value: unknown; type: 'i16';} |
-        {value: unknown; type: 'i32';} |
-        {value: unknown; type: 'i64';} |
-        {value: unknown; type: 'u8';} |
-        {value: unknown; type: 'u16';} |
-        {value: unknown; type: 'u32';} |
-        {value: unknown; type: 'u64';} |
-        {value: unknown; type: 'f16';} |
-        {value: unknown; type: 'f32';} |
-        {value: unknown; type: 'f64';} |
-        {value: unknown; type: 'bool'} |
-        {value: unknown; type: 'utf8'} |
-        {value: unknown; type: `i8[${DimTail}]`;} |
-        {value: unknown; type: `i16[${DimTail}]`;} |
-        {value: unknown; type: `i32[${DimTail}]`;} |
-        {value: unknown; type: `i64[${DimTail}]`;} |
-        {value: unknown; type: `u8[${DimTail}]`;} |
-        {value: unknown; type: `u16[${DimTail}]`;} |
-        {value: unknown; type: `u32[${DimTail}]`;} |
-        {value: unknown; type: `u64[${DimTail}]`;} |
-        {value: unknown; type: `f16[${DimTail}]`;} |
-        {value: unknown; type: `f32[${DimTail}]`;} |
-        {value: unknown; type: `f64[${DimTail}]`;} |
-        {value: unknown; type: `bool[${DimTail}]`} |
-        {value: unknown; type: `utf8[${DimTail}]`} |
-        {value: any; type: unknown;};
+        {value?: unknown; type: StructType;} |
+        {value?: unknown; type: `i8[${DimTail}]`;} |
+        {value?: unknown; type: `u8[${DimTail}]`;} |
+        {value?: unknown; type: `u8c[${DimTail}]`;} |
+        {value?: unknown; type: `i16[${DimTail}]`;} |
+        {value?: unknown; type: `u16[${DimTail}]`;} |
+        {value?: unknown; type: `i32[${DimTail}]`;} |
+        {value?: unknown; type: `u32[${DimTail}]`;} |
+        {value?: unknown; type: `i64[${DimTail}]`;} |
+        {value?: unknown; type: `u64[${DimTail}]`;} |
+        {value?: unknown; type: `f16[${DimTail}]`;} |
+        {value?: unknown; type: `f32[${DimTail}]`;} |
+        {value?: unknown; type: `f64[${DimTail}]`;} |
+        {value?: unknown; type: `bool[${DimTail}]`;} |
+        {value?: unknown; type: `utf8[${DimTail}]`;} |
+        {value?: unknown; type: unknown;};
 }
 
 type StructBaseData<B extends boolean = unknown> = {
@@ -218,18 +207,20 @@ type StructData<
         ? StructData<T[K]['value'], B>
         : T[K]['type'] extends 'i8'
         ? number
-        : T[K]['type'] extends 'i16'
-        ? number
-        : T[K]['type'] extends 'i32'
-        ? number
-        : T[K]['type'] extends 'i64'
-        ? BigInt
         : T[K]['type'] extends 'u8'
+        ? number
+        : T[K]['type'] extends 'u8c'
+        ? number
+        : T[K]['type'] extends 'i16'
         ? number
         : T[K]['type'] extends 'u16'
         ? number
+        : T[K]['type'] extends 'i32'
+        ? number
         : T[K]['type'] extends 'u32'
         ? number
+        : T[K]['type'] extends 'i64'
+        ? BigInt
         : T[K]['type'] extends 'u64'
         ? BigInt
         : T[K]['type'] extends 'f16'
@@ -244,18 +235,20 @@ type StructData<
         ? string
         : T[K]['type'] extends `i8[${DimTail}]`
         ? ArrayFromPath<T[K]['type'], B extends false ? number : Int8Array>
-        : T[K]['type'] extends `i16[${DimTail}]`
-        ? ArrayFromPath<T[K]['type'], B extends false ? number : Int16Array>
-        : T[K]['type'] extends `i32[${DimTail}]`
-        ? ArrayFromPath<T[K]['type'], B extends false ? number : Int32Array>
-        : T[K]['type'] extends `i64[${DimTail}]`
-        ? ArrayFromPath<T[K]['type'], B extends false ? number : BigInt64Array>
         : T[K]['type'] extends `u8[${DimTail}]`
         ? ArrayFromPath<T[K]['type'], B extends false ? number : Uint8Array>
+        : T[K]['type'] extends `u8c[${DimTail}]`
+        ? ArrayFromPath<T[K]['type'], B extends false ? number : Uint8ClampedArray>
+        : T[K]['type'] extends `i16[${DimTail}]`
+        ? ArrayFromPath<T[K]['type'], B extends false ? number : Int16Array>
         : T[K]['type'] extends `u16[${DimTail}]`
         ? ArrayFromPath<T[K]['type'], B extends false ? number : Uint16Array>
+        : T[K]['type'] extends `i32[${DimTail}]`
+        ? ArrayFromPath<T[K]['type'], B extends false ? number : Int32Array>
         : T[K]['type'] extends `u32[${DimTail}]`
         ? ArrayFromPath<T[K]['type'], B extends false ? number : Uint32Array>
+        : T[K]['type'] extends `i64[${DimTail}]`
+        ? ArrayFromPath<T[K]['type'], B extends false ? number : BigInt64Array>
         : T[K]['type'] extends `u64[${DimTail}]`
         ? ArrayFromPath<T[K]['type'], B extends false ? number : BigUint64Array>
         : T[K]['type'] extends `f16[${DimTail}]`
@@ -278,7 +271,6 @@ type StructInstance<
 
 declare var Struct: StructConstructor;
 
-declare module 'arraybuffer-struct' {
-    export = Struct;
-    export type {StructType, StructOptions, StructInputData, StructBaseData, StructData, StructInstance};
-}
+export = Struct;
+export default Struct;
+export type {StructType, StructOptions, StructInputData, StructBaseData, StructData, StructInstance};
