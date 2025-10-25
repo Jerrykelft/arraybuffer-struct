@@ -272,5 +272,5 @@ type StructInstance<
 declare var Struct: StructConstructor;
 
 export = Struct;
-export default Struct;
+export as namespace Struct;
 export type {StructType, StructOptions, StructInputData, StructBaseData, StructData, StructInstance};

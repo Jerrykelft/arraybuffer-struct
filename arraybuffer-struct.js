@@ -119,9 +119,9 @@
                     };
                 },
                 arrayLogicUint8(view, offset, length) {return {value: new this.array(view.buffer, offset, length), writable: true};}
-            },
-            utf16: {},
-            utf32: {}
+            }
+            // utf16: {},
+            // utf32: {}
         };
         return class Struct {
             static noWarn = false;

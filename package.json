@@ -1,6 +1,6 @@
 {
   "name": "arraybuffer-struct",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "Map ArrayBuffer to C-like struct with full type support.",
   "keywords": ["ArrayBuffer", "SharedArrayBuffer", "struct", "binary", "wasm", "data", "UMD", "CommonJS", "ESM"],
   "author": "Jerrykelft",
