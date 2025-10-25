@@ -308,7 +308,7 @@ uintptr_t get() {
 
 main.js:
 ```javascript
-import { Struct } from "arraybuffer-struct";
+import Struct from "arraybuffer-struct";
 import * as fs from "fs";
 
 const wasmBuffer = fs.readFileSync("./test.wasm");
