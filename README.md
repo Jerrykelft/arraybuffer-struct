@@ -28,7 +28,7 @@ A JavaScript library for working with memory buffers as struct types.
 **Always use little endian reading and writing.**
 
 ```javascript
-import { Struct } from 'arraybuffer-struct';
+import Struct from 'arraybuffer-struct';
 
 const point = new Struct({
     x: {value: 10, type: 'i32'},
