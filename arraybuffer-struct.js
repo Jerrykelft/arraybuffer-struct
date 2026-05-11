@@ -15,7 +15,7 @@
     }
 })(
     typeof globalThis !== 'undefined' ? globalThis : typeof self !== 'undefined' ? self : typeof window !== 'undefined' ? window : this,
-    function () {
+    function() {
         'use strict';
         const {
             DataView, TextEncoder, TextDecoder, Int8Array, Uint8Array, Int16Array, Uint16Array, Int32Array, Uint32Array, BigInt64Array, BigUint64Array, Float16Array, Float32Array, Float64Array, SharedArrayBuffer, ArrayBuffer
@@ -26,78 +26,91 @@
         const cString = str => {const nulIndex = str.indexOf('\0'); return nulIndex >= 0 ? str.slice(0, nulIndex) : str;};
         const typeMap = {
             i8: {
+                size: 1,
                 get: DataView.prototype.getInt8,
                 set: DataView.prototype.setInt8,
                 array: Int8Array,
                 arrayLogic(view, offset, length) {return {value: new this.array(view.buffer, offset, length), writable: true};}
             },
             u8: {
+                size: 1,
                 get: DataView.prototype.getUint8,
                 set: DataView.prototype.setUint8,
                 array: Uint8Array,
                 arrayLogic(view, offset, length) {return {value: new this.array(view.buffer, offset, length), writable: true};}
             },
             u8c: {
+                size: 1,
                 get: DataView.prototype.getUint8,
                 set: DataView.prototype.setUint8,
                 array: Uint8ClampedArray,
                 arrayLogic(view, offset, length) {return {value: new this.array(view.buffer, offset, length), writable: true};}
             },
             i16: {
+                size: 2,
                 get: DataView.prototype.getInt16,
                 set: DataView.prototype.setInt16,
                 array: Int16Array,
                 arrayLogic(view, offset, length) {return {value: new this.array(view.buffer, offset, length), writable: true};}
             },
             u16: {
+                size: 2,
                 get: DataView.prototype.getUint16,
                 set: DataView.prototype.setUint16,
                 array: Uint16Array,
                 arrayLogic(view, offset, length) {return {value: new this.array(view.buffer, offset, length), writable: true};}
             },
             i32: {
+                size: 4,
                 get: DataView.prototype.getInt32,
                 set: DataView.prototype.setInt32,
                 array: Int32Array,
                 arrayLogic(view, offset, length) {return {value: new this.array(view.buffer, offset, length), writable: true};}
             },
             u32: {
+                size: 4,
                 get: DataView.prototype.getUint32,
                 set: DataView.prototype.setUint32,
                 array: Uint32Array,
                 arrayLogic(view, offset, length) {return {value: new this.array(view.buffer, offset, length), writable: true};}
             },
             i64: {
+                size: 8,
                 get: DataView.prototype.getBigInt64,
                 set: DataView.prototype.setBigInt64,
                 array: BigInt64Array,
                 arrayLogic(view, offset, length) {return {value: new this.array(view.buffer, offset, length), writable: true};}
             },
             u64: {
+                size: 8,
                 get: DataView.prototype.getBigUint64,
                 set: DataView.prototype.setBigUint64,
                 array: BigUint64Array,
                 arrayLogic(view, offset, length) {return {value: new this.array(view.buffer, offset, length), writable: true};}
             },
             f16: {
+                size: 2,
                 get: DataView.prototype.getFloat16,
                 set: DataView.prototype.setFloat16,
                 array: Float16Array,
                 arrayLogic(view, offset, length) {return {value: new this.array(view.buffer, offset, length), writable: true};}
             },
             f32: {
+                size: 4,
                 get: DataView.prototype.getFloat32,
                 set: DataView.prototype.setFloat32,
                 array: Float32Array,
                 arrayLogic(view, offset, length) {return {value: new this.array(view.buffer, offset, length), writable: true};}
             },
             f64: {
+                size: 8,
                 get: DataView.prototype.getFloat64,
                 set: DataView.prototype.setFloat64,
                 array: Float64Array,
                 arrayLogic(view, offset, length) {return {value: new this.array(view.buffer, offset, length), writable: true};}
             },
             bool: {
+                size: 1,
                 /**@this {DataView}*/
                 get: function(byteOffset) {return Boolean(DataView.prototype.getUint8.call(this, byteOffset));},
                 /**@this {DataView}*/
@@ -106,6 +119,7 @@
                 arrayLogic: null
             },
             utf8: {
+                size: 1,
                 /**@this {DataView}*/
                 get: function(byteOffset) {return decoder.decode(new Uint8Array([DataView.prototype.getUint8.call(this, byteOffset)]));},
                 /**@this {DataView}*/
@@ -125,10 +139,10 @@
         };
         return class Struct {
             static noWarn = false;
-            /**@type {StructInstance['layout']}*/
+            /**@type {import('./arraybuffer-struct').StructInstance['layout']}*/
             layout = []; // 記憶體結構布局紀錄
             /**
-             * @param {StructBaseData | StructInstance} obj
+             * @param {import('./arraybuffer-struct').StructBaseData | import('./arraybuffer-struct').StructInstance} obj
              * @param {{shared?: boolean; utf8FixedSize?: boolean; layoutOpt?: boolean; align?: boolean; useTypedArray?: boolean; buffer?: ArrayBufferLike; byteOffset?: number;}} options
              */
             constructor(obj, options = {}) {
@@ -136,7 +150,7 @@
                 Object.defineProperty(this, 'data', {value: {}, writable: true, configurable: true, enumerable: false});
                 const thisCls = this;
                 if (Array.isArray(obj.layout) && obj.view instanceof DataView) {
-                    /**@type {StructBaseData}*/
+                    /**@type {import('./arraybuffer-struct').StructBaseData}*/
                     const {layout, view, useTypedArray} = obj;
                     this.layout = layout;
                     this.view = view;
@@ -223,7 +237,7 @@
                 }
                 /**
                  * @param {object} target
-                 * @param {{name: string[]; isArray: boolean[]; offset: number; type: StructType; length: number; dims: number[];}} info
+                 * @param {{name: string[]; isArray: boolean[]; offset: number; type: import('./arraybuffer-struct').StructType; length: number; dims: number[];}} info
                  */
                 function defineProperty(target, info) {
                     const {
@@ -262,7 +276,7 @@
                 }
                 /**
                  * @param {any[]} target 多維目標
-                 * @param {{offset: number; type: StructType; dims: number[];}} info
+                 * @param {{offset: number; type: import('./arraybuffer-struct').StructType; dims: number[];}} info
                  * @param {{i: number;}} state 用來追蹤一維位置
                  */
                 function defineReshape(target, info, state = {i: 0}) {
@@ -280,7 +294,7 @@
                     }
                 }
                 /**
-                 * @param {{target: object; name: string; offset: number; type: StructType; length: number; enumerable: boolean; configurable: boolean;}} info
+                 * @param {{target: object; name: string; offset: number; type: import('./arraybuffer-struct').StructType; length: number; enumerable: boolean; configurable: boolean;}} info
                  */
                 function defineArrayProperty(info) {
                     const {target, name, offset, type, length, enumerable = true, configurable = true} = info;
@@ -304,7 +318,7 @@
                 }
                 /**@param {string} typeName*/
                 function parseType(typeName) {
-                    /**@type {StructType}*/
+                    /**@type {import('./arraybuffer-struct').StructType}*/
                     const type = typeName.match(/^([a-zA-Z_$][\w$]*)/)?.[0];
                     const dims = [...typeName.matchAll(/\[\s*(\d+)\s*\]/g)].map(m => parseInt(m[1]));
                     const byteSize = typeMap[type].array.BYTES_PER_ELEMENT;

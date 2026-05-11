@@ -180,11 +180,10 @@ interface StructInputData {
         {value?: unknown; type: `f32[${DimTail}]`;} |
         {value?: unknown; type: `f64[${DimTail}]`;} |
         {value?: unknown; type: `bool[${DimTail}]`;} |
-        {value?: unknown; type: `utf8[${DimTail}]`;} |
-        {value?: unknown; type: unknown;};
+        {value?: unknown; type: `utf8[${DimTail}]`;};
 }
 
-type StructBaseData<B extends boolean = unknown> = {
+type StructBaseData<B extends boolean = true> = {
     layout: {
         name: string[];
         isArray: boolean[];
@@ -198,6 +197,21 @@ type StructBaseData<B extends boolean = unknown> = {
     [key: string]: never;
 };
 
+type TypedArrayMap = {
+    [k: `i8[${DimTail}]`]: Int8Array;
+    [k: `u8[${DimTail}]`]: Uint8Array;
+    [k: `u8c[${DimTail}]`]: Uint8ClampedArray;
+    [k: `i16[${DimTail}]`]: Int16Array;
+    [k: `u16[${DimTail}]`]: Uint16Array;
+    [k: `i32[${DimTail}]`]: Int32Array;
+    [k: `u32[${DimTail}]`]: Uint32Array;
+    [k: `i64[${DimTail}]`]: BigInt64Array;
+    [k: `u64[${DimTail}]`]: BigUint64Array;
+    [k: `f16[${DimTail}]`]: Float16Array;
+    [k: `f32[${DimTail}]`]: Float32Array;
+    [k: `f64[${DimTail}]`]: Float64Array;
+}
+
 type StructData<
     T extends {[key: string]: {value: unknown; type: unknown;};} = {[key: string]: {value: unknown; type: string;};},
     B extends boolean = true
@@ -205,58 +219,16 @@ type StructData<
     [K in keyof T]:
         T[K]['type'] extends 'struct'
         ? StructData<T[K]['value'], B>
-        : T[K]['type'] extends 'i8'
+        : T[K]['type'] extends 'i8' | 'u8' | 'u8c' | 'i16' | 'u16' | 'i32' | 'u32' | 'f16' | 'f32' | 'f64'
         ? number
-        : T[K]['type'] extends 'u8'
-        ? number
-        : T[K]['type'] extends 'u8c'
-        ? number
-        : T[K]['type'] extends 'i16'
-        ? number
-        : T[K]['type'] extends 'u16'
-        ? number
-        : T[K]['type'] extends 'i32'
-        ? number
-        : T[K]['type'] extends 'u32'
-        ? number
-        : T[K]['type'] extends 'i64'
+        : T[K]['type'] extends 'i64' | 'u64'
         ? BigInt
-        : T[K]['type'] extends 'u64'
-        ? BigInt
-        : T[K]['type'] extends 'f16'
-        ? number
-        : T[K]['type'] extends 'f32'
-        ? number
-        : T[K]['type'] extends 'f64'
-        ? number
         : T[K]['type'] extends 'bool'
         ? boolean
         : T[K]['type'] extends 'utf8'
         ? string
-        : T[K]['type'] extends `i8[${DimTail}]`
-        ? ArrayFromPath<T[K]['type'], B extends false ? number : Int8Array>
-        : T[K]['type'] extends `u8[${DimTail}]`
-        ? ArrayFromPath<T[K]['type'], B extends false ? number : Uint8Array>
-        : T[K]['type'] extends `u8c[${DimTail}]`
-        ? ArrayFromPath<T[K]['type'], B extends false ? number : Uint8ClampedArray>
-        : T[K]['type'] extends `i16[${DimTail}]`
-        ? ArrayFromPath<T[K]['type'], B extends false ? number : Int16Array>
-        : T[K]['type'] extends `u16[${DimTail}]`
-        ? ArrayFromPath<T[K]['type'], B extends false ? number : Uint16Array>
-        : T[K]['type'] extends `i32[${DimTail}]`
-        ? ArrayFromPath<T[K]['type'], B extends false ? number : Int32Array>
-        : T[K]['type'] extends `u32[${DimTail}]`
-        ? ArrayFromPath<T[K]['type'], B extends false ? number : Uint32Array>
-        : T[K]['type'] extends `i64[${DimTail}]`
-        ? ArrayFromPath<T[K]['type'], B extends false ? number : BigInt64Array>
-        : T[K]['type'] extends `u64[${DimTail}]`
-        ? ArrayFromPath<T[K]['type'], B extends false ? number : BigUint64Array>
-        : T[K]['type'] extends `f16[${DimTail}]`
-        ? ArrayFromPath<T[K]['type'], B extends false ? number : Float16Array>
-        : T[K]['type'] extends `f32[${DimTail}]`
-        ? ArrayFromPath<T[K]['type'], B extends false ? number : Float32Array>
-        : T[K]['type'] extends `f64[${DimTail}]`
-        ? ArrayFromPath<T[K]['type'], B extends false ? number : Float64Array>
+        : T[K]['type'] extends keyof TypedArrayMap
+        ? ArrayFromPath<T[K]['type'], B extends false ? number : TypedArrayMap[T[K]['type']]>
         : T[K]['type'] extends `bool[${DimTail}]`
         ? ArrayFromPath<T[K]['type'], boolean>
         : T[K]['type'] extends `utf8[${DimTail}]`
